@@ -43,7 +43,7 @@ export function studGrid(width: number, height: number, dpr = 1): StudGrid {
   // Target stud count sets the stud *size* (the cap keeps studs from shrinking
   // on very wide screens). Round it to whole device pixels, then fit as many
   // whole studs as the area holds.
-  const targetCols = Math.max(40, Math.min(112, Math.round(w / 14)));
+  const targetCols = Math.max(40, Math.min(112, Math.round(w / 10)));
   const cell = Math.max(1, Math.round(deviceW / targetCols));
 
   const size = cell / dpr; // css px per stud
