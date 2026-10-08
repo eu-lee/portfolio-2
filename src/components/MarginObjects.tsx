@@ -197,9 +197,9 @@ export function MarginObjects() {
       }}>
         <div className="object-dialog-content">
           <form method="dialog"><button className="object-close" aria-label="Close details">×</button></form>
-          <p className="object-eyebrow">A personal object</p>
           <h2 id="object-title">{selected?.label}</h2>
-          <p id="object-description">A placeholder for a personal object. Its story and significance will go here.</p>
+          {selected && <img className="object-dialog-image" src={selected.image} alt={selected.label} />}
+          <p id="object-description">More about {selected?.label.toLowerCase()} coming soon.</p>
         </div>
       </dialog>
     </>
