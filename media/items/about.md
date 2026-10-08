@@ -12,6 +12,8 @@ initial:
   y: 231
 ---
 
-Hi, I'm Eugene and I study Software Engineering at the University of Waterloo. I love algorithms and interesting problems.
+Hi!
+
+My name is Eugene and I study Software Engineering at the University of Waterloo. I love algorithms and interesting problems.
 
 When I have free time, I enjoy the outdoors, gaming, and spending time with my pets. Feel free to reach out!

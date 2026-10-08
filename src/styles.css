@@ -128,7 +128,8 @@ footer { padding: 0 0 32px; color: #706b62; font-size: 0.875rem; }
 .object-close:hover { background: #eeece5; }
 .object-dialog h2 { font-size: 28px; line-height: 1.2; margin: 0; text-box-trim: trim-both; text-box-edge: cap alphabetic; }
 .object-dialog h2:focus { outline: none; }
-.object-dialog-image { display: block; width: 100%; height: 230px; object-fit: contain; margin-bottom: 28px; }
+.object-dialog-image { display: block; width: 100%; height: 230px; object-fit: contain; }
+.object-dialog-divider { border: 0; border-top: 1px solid #dedbd3; margin: 24px 0; }
 .object-dialog #object-description { color: #706b62; font-size: 15px; }
 #object-description > * + * { margin-top: 1em; }
 #object-description :is(h1, h2, h3, h4, h5, h6) { color: #292823; font-size: 1.15em; line-height: 1.4; text-box-trim: none; }

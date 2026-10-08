@@ -170,6 +170,7 @@ export function MarginObjects() {
             </form>
           </div>
           {selected && <img className="object-dialog-image" src={selected.image} alt={selected.imageAlt} />}
+          <hr className="object-dialog-divider" />
           <div id="object-description"><Markdown>{selected?.description ?? ""}</Markdown></div>
         </div>
       </dialog>

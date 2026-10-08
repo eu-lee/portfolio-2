@@ -12,4 +12,6 @@ initial:
   y: 659
 ---
 
-More about walnuts coming soon.
+These are a pair of walnuts I picked up from an antique market in Beijing. 
+
+Although they're currently a light brown, with enough time and rolling in your hands, they develop a dark-red patina. I like to roll them whenever I think about problems; their colour as a signal for the effort poured into pursing something. 

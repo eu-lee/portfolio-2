@@ -12,9 +12,9 @@ initial:
   y: 608
 ---
 
-Here are some of my favourite games
+Here are some of my current favourite games
 
-- Valorant
-- CS2
-- League of Legends
+- Slay the Spire 2
+- CS 2
+
 
