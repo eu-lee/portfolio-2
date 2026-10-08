@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { BrickCanvas } from "./BrickCanvas";
 import { SocialLinks } from "./SocialLinks";
 import { useStudGrid } from "../lib/heroGrid";
-import headerVideo from "../../bkg.mp4";
+import headerVideo from "../../media/bkg.mp4";
 
 export function Hero() {
   const mediaRef = useRef<HTMLDivElement>(null);

@@ -1,8 +1,8 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
-import walnuts from "../../walnuts.png";
-import games from "../../games.png";
-import about from "../../about.png";
+import walnuts from "../../media/items/walnuts.png";
+import games from "../../media/items/games.png";
+import about from "../../media/items/about.png";
 
 type Point = { x: number; y: number };
 const objects = [
