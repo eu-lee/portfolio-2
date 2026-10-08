@@ -1,5 +1,5 @@
 :root {
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: "Space Grotesk", sans-serif;
   color: #292823;
   background: #faf9f6;
   font-synthesis: none;
@@ -11,13 +11,55 @@
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 280px; }
 h1, h2, p { margin: 0; }
-h1 { margin-top: 28px; font-size: clamp(2.5rem, 7vw, 3.5rem); font-weight: 550; letter-spacing: -0.05em; line-height: 1.15; }
-h2 { font-size: 1.125rem; font-weight: 550; letter-spacing: -0.025em; }
-.page { width: min(100% - 40px, 720px); margin-inline: auto; }
-.hero { padding-top: clamp(40px, 10vw, 96px); }
-.hero-media { width: clamp(180px, 50vw, 280px); aspect-ratio: 1; border-radius: 28%; corner-shape: squircle; overflow: hidden; }
+h2 { font-size: 1rem; font-weight: 500; letter-spacing: -0.015em; }
+.page { width: min(100% - 40px, 680px); margin-inline: auto; }
+.hero { padding-top: clamp(24px, 6vw, 48px); }
+.hero-media { position: relative; width: 100%; aspect-ratio: 21 / 9; border-radius: clamp(16px, 3vw, 24px); corner-shape: squircle; overflow: hidden; background: #000; }
+.hero-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  corner-shape: inherit;
+  box-shadow: inset 0 0 24px 0 rgb(0 0 0 / 75%);
+  pointer-events: none;
+}
+.hero-intro {
+  position: absolute;
+  z-index: 3;
+  left: clamp(14px, 2.5vw, 20px);
+  right: clamp(14px, 2.5vw, 20px);
+  bottom: clamp(14px, 2.5vw, 20px);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  color: #fff;
+  text-shadow: 0 2px 12px rgb(0 0 0 / 55%);
+}
+.hero-name {
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(2.75rem, 7vw, 4.5rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1;
+}
+.brick-canvas { position: absolute; z-index: 1; transform: translateZ(0); backface-visibility: hidden; }
+.hero-details { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; margin-top: 6px; margin-inline: clamp(14px, 2.5vw, 20px); }
+.hero-tagline { font-size: clamp(0.875rem, 1.8vw, 1rem); line-height: 1.5; color: #706b62; }
+.social-links { display: flex; align-items: center; gap: 8px; }
+.social-links a { display: grid; place-items: center; width: 32px; height: 32px; color: #706b62; border-radius: 6px; }
+.social-links a:hover, .social-links a:focus-visible { color: #292823; background: #eeece5; }
+.social-links svg { width: 18px; height: 18px; }
+@media (max-width: 400px) {
+  .hero-name { font-size: clamp(1.75rem, 8vw, 2rem); }
+  .hero-intro { gap: 8px; }
+}
+.brick-media-source { position: absolute; inset: 0 auto auto 0; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; }
+.hero-video-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: #bdb9b0; font-size: 0.875rem; }
 .placeholder { display: grid; place-items: center; padding: 24px; color: #706b62; background: #eeece5; text-align: center; font-size: 0.875rem; }
-main { margin-top: 72px; }
+main { margin-top: 56px; }
 .section { margin-bottom: 64px; }
 .empty-state { margin-top: 20px; padding-block: 24px; border-top: 1px solid #dedbd3; color: #706b62; }
 .personal-table { min-height: 240px; margin-top: 20px; border: 1px solid #dedbd3; border-radius: 20px; }
