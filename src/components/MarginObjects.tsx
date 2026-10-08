@@ -1,16 +1,9 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
-import walnuts from "../../media/items/walnuts.png";
-import games from "../../media/items/games.png";
-import about from "../../media/items/about.png";
+import { objects } from "../data/items";
+import type { ObjectItem } from "../data/items";
 
 type Point = { x: number; y: number };
-const objects = [
-  { id: "games", label: "Games", image: games, size: 140, initial: { x: -646, y: 608 } },
-  { id: "walnuts", label: "Walnuts", image: walnuts, size: 120, initial: { x: 583, y: 659 } },
-  { id: "about", label: "About", image: about, size: 120, initial: { x: 375, y: 231 } },
-] as const;
-type ObjectItem = (typeof objects)[number];
 // Coordinates are fixed CSS pixels relative to the page's horizontal center.
 const layoutWidth = 1512;
 const layoutHeight = 856;
@@ -90,8 +83,8 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
     <button
       type="button"
       className={`margin-object margin-object--${item.id}${dragging ? " is-dragging" : ""}`}
-      style={{ zIndex, "--object-size": `${size}px`, "--object-x": `${position.x}px`, "--object-y": `${position.y}px` } as CSSProperties}
-      aria-label={`${item.label}: double-click or press Enter for details. Drag or use arrow keys to move.`}
+      style={{ zIndex, "--object-label-gap": `${item.labelGap}px`, "--object-size": `${size}px`, "--object-x": `${position.x}px`, "--object-y": `${position.y}px` } as CSSProperties}
+      aria-label={`${item.hoverLabel}: double-click or press Enter for details. Drag or use arrow keys to move.`}
       aria-haspopup="dialog"
       onPointerDown={(event) => {
         if (event.button !== 0 || !position || drag.current) return;
@@ -136,7 +129,7 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
           ...(position.y + size + 44 > layoutHeight ? { top: "auto", bottom: "calc(100% + var(--object-label-gap, 10px))" } : {}),
         }}
       >
-        {item.label}
+        {item.hoverLabel}
       </span>
       </span>
     </button>
@@ -166,7 +159,7 @@ export function MarginObjects() {
       }}>
         <div className="object-dialog-content">
           <div className="object-dialog-header">
-            <h2 ref={dialogTitle} id="object-title" tabIndex={-1}>{selected?.label}</h2>
+            <h2 ref={dialogTitle} id="object-title" tabIndex={-1}>{selected?.title}</h2>
             <form method="dialog">
               <button className="object-close" aria-label="Close details">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
@@ -175,8 +168,8 @@ export function MarginObjects() {
               </button>
             </form>
           </div>
-          {selected && <img className="object-dialog-image" src={selected.image} alt={selected.label} />}
-          <p id="object-description">More about {selected?.label.toLowerCase()} coming soon.</p>
+          {selected && <img className="object-dialog-image" src={selected.image} alt={selected.imageAlt} />}
+          <p id="object-description">{selected?.description}</p>
         </div>
       </dialog>
     </>

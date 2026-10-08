@@ -1,0 +1,13 @@
+title: About Me
+hoverLabel: About
+image: about.png
+imageAlt: Yellow notes with a red pushpin
+description: |-
+  Hi 
+order: 3
+size: 120
+labelGap: 4
+# CSS pixels: x is relative to the page center; y is from the page top.
+initial:
+  x: 375
+  y: 231
