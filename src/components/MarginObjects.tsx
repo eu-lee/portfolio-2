@@ -6,9 +6,9 @@ import about from "../../about.png";
 
 type Point = { x: number; y: number };
 const objects = [
-  { id: "games", label: "Games", image: games, side: "left", height: 0.72, marginOffset: 0.5 },
-  { id: "walnuts", label: "Walnuts", image: walnuts, side: "right", height: 0.49, marginOffset: 0.5 },
-  { id: "about", label: "About", image: about, side: "left", height: 0.26, marginOffset: 0.88 },
+  { id: "games", label: "Games", image: games, side: "left", height: 0.71, marginOffset: 0.4 },
+  { id: "walnuts", label: "Walnuts", image: walnuts, side: "right", height: 0.77, marginOffset: 0.18 },
+  { id: "about", label: "About", image: about, side: "right", height: 0.27, marginOffset: 0.88 },
 ] as const;
 type ObjectItem = (typeof objects)[number];
 function objectSize(item: ObjectItem): number {
@@ -16,7 +16,7 @@ function objectSize(item: ObjectItem): number {
   const maxSize = item.id === "games" ? 140 : 120;
   return Math.max(48, Math.min(maxSize, gutter - 8));
 }
-const returnDelay = 3000;
+const returnDelay = 1500;
 
 function inMargin(point: Point, size: number): boolean {
   const page = document.querySelector(".page")?.getBoundingClientRect();
@@ -166,7 +166,7 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
         aria-hidden="true"
         style={{
           left: Math.max(52 - position.x, Math.min(size / 2, window.innerWidth - position.x - 52)) - 4,
-          ...(position.y + size + 44 > window.innerHeight ? { top: "auto", bottom: "calc(100% + 10px)" } : {}),
+          ...(position.y + size + 44 > window.innerHeight ? { top: "auto", bottom: "calc(100% + var(--object-label-gap, 10px))" } : {}),
         }}
       >
         {item.label}

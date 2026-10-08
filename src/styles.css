@@ -86,9 +86,10 @@ footer { padding: 0 0 32px; color: #706b62; font-size: 0.875rem; }
 }
 .margin-object.is-dragging { transition: none; cursor: grabbing; }
 .object-visual { position: relative; display: grid; place-items: center; width: 100%; }
+.margin-object--about { --object-label-gap: 4px; }
 .object-label {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + var(--object-label-gap, 10px));
   width: max-content;
   padding: 5px 12px;
   border: 1px solid rgb(41 40 35 / 9%);
