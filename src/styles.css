@@ -15,7 +15,10 @@ h1 { margin-top: 28px; font-size: clamp(2.5rem, 7vw, 3.5rem); font-weight: 550; 
 h2 { font-size: 1.125rem; font-weight: 550; letter-spacing: -0.025em; }
 .page { width: min(100% - 40px, 720px); margin-inline: auto; }
 .hero { padding-top: clamp(40px, 10vw, 96px); }
-.hero-media { width: clamp(180px, 50vw, 280px); aspect-ratio: 1; border-radius: 28%; corner-shape: squircle; overflow: hidden; }
+.hero-media { position: relative; width: 100%; aspect-ratio: 21 / 9; border-radius: clamp(24px, 5vw, 40px); corner-shape: squircle; overflow: hidden; background: #000; }
+.brick-canvas { position: absolute; z-index: 1; transform: translateZ(0); backface-visibility: hidden; }
+.brick-media-source { position: absolute; inset: 0 auto auto 0; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; }
+.hero-video-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: #bdb9b0; font-size: 0.875rem; }
 .placeholder { display: grid; place-items: center; padding: 24px; color: #706b62; background: #eeece5; text-align: center; font-size: 0.875rem; }
 main { margin-top: 72px; }
 .section { margin-bottom: 64px; }

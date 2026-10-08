@@ -17,3 +17,8 @@ Thumbs.db
 # Local editor settings
 .idea/
 .vscode/
+
+# Local documentation and agent instructions (never commit)
+[Rr][Ee][Aa][Dd][Mm][Ee]*
+[Aa][Gg][Ee][Nn][Tt].[Mm][Dd]
+[Aa][Gg][Ee][Nn][Tt][Ss].[Mm][Dd]
