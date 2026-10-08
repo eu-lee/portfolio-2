@@ -67,9 +67,9 @@ footer { padding: 0 0 32px; color: #706b62; font-size: 0.875rem; }
 .skip-link:focus { transform: translateY(0); }
 
 .margin-object {
-  position: fixed;
+  position: absolute;
   top: 0;
-  left: 0;
+  left: 50%;
   z-index: 5;
   width: var(--object-size, 48px);
   height: var(--object-size, 48px);

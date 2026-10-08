@@ -6,45 +6,33 @@ import about from "../../about.png";
 
 type Point = { x: number; y: number };
 const objects = [
-  { id: "games", label: "Games", image: games, side: "left", height: 0.71, marginOffset: 0.4 },
-  { id: "walnuts", label: "Walnuts", image: walnuts, side: "right", height: 0.77, marginOffset: 0.18 },
-  { id: "about", label: "About", image: about, side: "right", height: 0.27, marginOffset: 0.88 },
+  { id: "games", label: "Games", image: games, size: 140, initial: { x: -646, y: 608 } },
+  { id: "walnuts", label: "Walnuts", image: walnuts, size: 120, initial: { x: 583, y: 659 } },
+  { id: "about", label: "About", image: about, size: 120, initial: { x: 375, y: 231 } },
 ] as const;
 type ObjectItem = (typeof objects)[number];
-function objectSize(item: ObjectItem): number {
-  const gutter = document.querySelector(".page")?.getBoundingClientRect().left ?? 56;
-  const maxSize = item.id === "games" ? 140 : 120;
-  return Math.max(48, Math.min(maxSize, gutter - 8));
-}
+// Coordinates are fixed CSS pixels relative to the page's horizontal center.
+const layoutWidth = 1512;
+const layoutHeight = 856;
 const returnDelay = 1500;
 
 function inMargin(point: Point, size: number): boolean {
   const page = document.querySelector(".page")?.getBoundingClientRect();
-  return !!page && (point.x + size <= page.left || point.x >= page.right);
+  const x = document.documentElement.clientWidth / 2 + point.x - window.scrollX;
+  return !!page && (x + size <= page.left || x >= page.right);
 }
 
-function clampToViewport(point: Point, size: number): Point {
+function clampToLayout(point: Point, size: number): Point {
   return {
-    x: Math.max(0, Math.min(window.innerWidth - size, point.x)),
-    y: Math.max(0, Math.min(window.innerHeight - size, point.y)),
-  };
-}
-
-function home(item: ObjectItem): Point {
-  const size = objectSize(item);
-  const page = document.querySelector(".page")?.getBoundingClientRect();
-  const gutter = page?.left ?? 56;
-  const offset = Math.max(4, (gutter - size) * item.marginOffset);
-  return {
-    x: item.side === "left" ? offset : window.innerWidth - offset - size,
-    y: Math.max(8, Math.min(window.innerHeight - size - 8, window.innerHeight * item.height)),
+    x: Math.max(-layoutWidth / 2, Math.min(layoutWidth / 2 - size, point.x)),
+    y: Math.max(0, Math.min(layoutHeight - size, point.y)),
   };
 }
 
 function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onOpen: () => void; onRaise: () => void; zIndex: number }) {
   const [position, setPosition] = useState<Point | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [size, setSize] = useState(48);
+  const size = item.size;
   const initialPosition = useRef<Point | null>(null);
   const lastMarginPosition = useRef<Point | null>(null);
   const currentPosition = useRef<Point | null>(null);
@@ -54,13 +42,13 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
 
   const clearReturn = () => clearTimeout(timer.current);
   const move = (point: Point) => {
-    const next = clampToViewport(point, objectSize(item));
+    const next = clampToLayout(point, size);
     currentPosition.current = next;
     setPosition(next);
   };
   const returnHome = () => {
     clearReturn();
-    move(lastMarginPosition.current ?? initialPosition.current ?? home(item));
+    move(lastMarginPosition.current ?? initialPosition.current ?? { ...item.initial });
   };
   const scheduleReturn = () => {
     clearReturn();
@@ -69,37 +57,16 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
   const settle = () => {
     clearReturn();
     const point = currentPosition.current;
-    if (point && inMargin(point, objectSize(item))) lastMarginPosition.current = { ...point };
+    if (point && inMargin(point, size)) lastMarginPosition.current = { ...point };
     else scheduleReturn();
   };
 
   useLayoutEffect(() => {
-    initialPosition.current = home(item);
+    initialPosition.current = { ...item.initial };
     lastMarginPosition.current = { ...initialPosition.current };
-    const reset = () => {
-      const size = objectSize(item);
-      setSize(size);
-      clearTimeout(timer.current);
-      drag.current = null;
-      setDragging(false);
-      // Preserve the last margin drop across resizes, keeping it outside the page.
-      const saved = clampToViewport(lastMarginPosition.current ?? home(item), size);
-      const page = document.querySelector(".page")?.getBoundingClientRect();
-      if (page && !inMargin(saved, size)) {
-        saved.x = saved.x + size / 2 < window.innerWidth / 2
-          ? Math.max(0, page.left - size)
-          : Math.min(window.innerWidth - size, page.right);
-      }
-      lastMarginPosition.current = saved;
-      currentPosition.current = saved;
-      setPosition(saved);
-    };
-    reset();
-    window.addEventListener("resize", reset);
-    return () => {
-      clearTimeout(timer.current);
-      window.removeEventListener("resize", reset);
-    };
+    currentPosition.current = { ...item.initial };
+    setPosition({ ...item.initial });
+    return () => clearTimeout(timer.current);
   }, [item]);
 
   const finishDrag = (event: PointerEvent<HTMLButtonElement>, cancelled = false) => {
@@ -130,14 +97,14 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
         if (event.button !== 0 || !position || drag.current) return;
         onRaise();
         clearReturn();
-        drag.current = { pointer: event.pointerId, start: { x: event.clientX, y: event.clientY }, origin: position, moved: false };
+        drag.current = { pointer: event.pointerId, start: { x: event.pageX, y: event.pageY }, origin: position, moved: false };
         event.currentTarget.setPointerCapture(event.pointerId);
       }}
       onPointerMove={(event) => {
         const active = drag.current;
         if (!active || active.pointer !== event.pointerId) return;
-        const dx = event.clientX - active.start.x;
-        const dy = event.clientY - active.start.y;
+        const dx = event.pageX - active.start.x;
+        const dy = event.pageY - active.start.y;
         if (Math.hypot(dx, dy) > 5) active.moved = true;
         if (!active.moved) return;
         setDragging(true);
@@ -165,8 +132,8 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
         className="object-label"
         aria-hidden="true"
         style={{
-          left: Math.max(52 - position.x, Math.min(size / 2, window.innerWidth - position.x - 52)) - 4,
-          ...(position.y + size + 44 > window.innerHeight ? { top: "auto", bottom: "calc(100% + var(--object-label-gap, 10px))" } : {}),
+          left: Math.max(52 - layoutWidth / 2 - position.x, Math.min(size / 2, layoutWidth / 2 - position.x - 52)) - 4,
+          ...(position.y + size + 44 > layoutHeight ? { top: "auto", bottom: "calc(100% + var(--object-label-gap, 10px))" } : {}),
         }}
       >
         {item.label}
