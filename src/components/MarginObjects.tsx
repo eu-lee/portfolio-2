@@ -2,16 +2,16 @@ import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
 import walnuts from "../../walnuts.png";
 import games from "../../games.png";
+import about from "../../about.png";
 
 type Point = { x: number; y: number };
 const objects = [
-  { id: "games", label: "Games", side: "left", height: 0.3 },
-  { id: "walnuts", label: "Walnuts", side: "right", height: 0.52 },
-  { id: "stone", label: "Object 03", side: "left", height: 0.76 },
+  { id: "games", label: "Games", image: games, side: "left", height: 0.72, marginOffset: 0.5 },
+  { id: "walnuts", label: "Walnuts", image: walnuts, side: "right", height: 0.49, marginOffset: 0.5 },
+  { id: "about", label: "About", image: about, side: "left", height: 0.26, marginOffset: 0.88 },
 ] as const;
 type ObjectItem = (typeof objects)[number];
 function objectSize(item: ObjectItem): number {
-  if (item.id === "stone") return 48;
   const gutter = document.querySelector(".page")?.getBoundingClientRect().left ?? 56;
   const maxSize = item.id === "games" ? 140 : 120;
   return Math.max(48, Math.min(maxSize, gutter - 8));
@@ -34,8 +34,9 @@ function home(item: ObjectItem): Point {
   const size = objectSize(item);
   const page = document.querySelector(".page")?.getBoundingClientRect();
   const gutter = page?.left ?? 56;
+  const offset = Math.max(4, (gutter - size) * item.marginOffset);
   return {
-    x: item.side === "left" ? Math.max(4, (gutter - size) / 2) : window.innerWidth - Math.max(4, (gutter - size) / 2) - size,
+    x: item.side === "left" ? offset : window.innerWidth - offset - size,
     y: Math.max(8, Math.min(window.innerHeight - size - 8, window.innerHeight * item.height)),
   };
 }
@@ -159,11 +160,7 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
       }}
     >
       <span className="object-visual">
-      {item.id !== "stone" ? (
-        <img className="object-shape object-image" src={item.id === "games" ? games : walnuts} alt="" draggable={false} />
-      ) : (
-        <span className="object-shape" aria-hidden="true" />
-      )}
+      <img className="object-shape object-image" src={item.image} alt="" draggable={false} />
       <span
         className="object-label"
         aria-hidden="true"

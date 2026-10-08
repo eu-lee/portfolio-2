@@ -127,7 +127,6 @@ footer { padding: 0 0 32px; color: #706b62; font-size: 0.875rem; }
     drop-shadow(0 3px 3px rgb(41 40 35 / 18%));
   pointer-events: none;
 }
-.margin-object--stone .object-shape { background: #b4b6bb; border: 1px solid #9ea0a7; border-radius: 45% 55% 60% 40%; transform: rotate(22deg); }
 .object-dialog { width: min(440px, calc(100% - 40px)); max-height: calc(100dvh - 48px); padding: 0; border: 1px solid #dedbd3; border-radius: 18px; color: inherit; background: #faf9f6; box-shadow: 0 24px 80px rgb(41 40 35 / 15%); }
 .object-dialog::backdrop { background: rgb(41 40 35 / 25%); backdrop-filter: blur(4px); }
 .object-dialog-content { position: relative; padding: 40px 32px; }
