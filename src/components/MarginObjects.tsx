@@ -11,6 +11,18 @@ type ObjectItem = (typeof objects)[number];
 const size = 48;
 const returnDelay = 3000;
 
+function inMargin(point: Point): boolean {
+  const page = document.querySelector(".page")?.getBoundingClientRect();
+  return !!page && (point.x + size <= page.left || point.x >= page.right);
+}
+
+function clampToViewport(point: Point): Point {
+  return {
+    x: Math.max(0, Math.min(window.innerWidth - size, point.x)),
+    y: Math.max(0, Math.min(window.innerHeight - size, point.y)),
+  };
+}
+
 function home(item: ObjectItem): Point {
   const page = document.querySelector(".page")?.getBoundingClientRect();
   const gutter = page?.left ?? 56;
@@ -23,26 +35,52 @@ function home(item: ObjectItem): Point {
 function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }) {
   const [position, setPosition] = useState<Point | null>(null);
   const [dragging, setDragging] = useState(false);
+  const initialPosition = useRef<Point | null>(null);
+  const lastMarginPosition = useRef<Point | null>(null);
+  const currentPosition = useRef<Point | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const drag = useRef<{ pointer: number; start: Point; origin: Point; moved: boolean } | null>(null);
   const suppressDoubleClick = useRef(false);
 
   const clearReturn = () => clearTimeout(timer.current);
+  const move = (point: Point) => {
+    const next = clampToViewport(point);
+    currentPosition.current = next;
+    setPosition(next);
+  };
   const returnHome = () => {
     clearReturn();
-    setPosition(home(item));
+    move(lastMarginPosition.current ?? initialPosition.current ?? home(item));
   };
   const scheduleReturn = () => {
     clearReturn();
     timer.current = setTimeout(returnHome, returnDelay);
   };
+  const settle = () => {
+    clearReturn();
+    const point = currentPosition.current;
+    if (point && inMargin(point)) lastMarginPosition.current = { ...point };
+    else scheduleReturn();
+  };
 
   useEffect(() => {
+    initialPosition.current = home(item);
+    lastMarginPosition.current = { ...initialPosition.current };
     const reset = () => {
       clearTimeout(timer.current);
       drag.current = null;
       setDragging(false);
-      setPosition(home(item));
+      // Preserve the last margin drop across resizes, keeping it outside the page.
+      const saved = clampToViewport(lastMarginPosition.current ?? home(item));
+      const page = document.querySelector(".page")?.getBoundingClientRect();
+      if (page && !inMargin(saved)) {
+        saved.x = saved.x + size / 2 < window.innerWidth / 2
+          ? Math.max(0, page.left - size)
+          : Math.min(window.innerWidth - size, page.right);
+      }
+      lastMarginPosition.current = saved;
+      currentPosition.current = saved;
+      setPosition(saved);
     };
     reset();
     window.addEventListener("resize", reset);
@@ -52,10 +90,6 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
     };
   }, [item]);
 
-  const move = (point: Point) => setPosition({
-    x: Math.max(0, Math.min(window.innerWidth - size, point.x)),
-    y: Math.max(0, Math.min(window.innerHeight - size, point.y)),
-  });
   const finishDrag = (event: PointerEvent<HTMLButtonElement>, cancelled = false) => {
     const active = drag.current;
     if (!active || active.pointer !== event.pointerId) return;
@@ -64,7 +98,7 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
     setDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     if (cancelled) returnHome();
-    else scheduleReturn();
+    else settle();
   };
 
   return (
@@ -102,7 +136,7 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
         if (direction && position) {
           event.preventDefault();
           move({ x: position.x + direction.x, y: position.y + direction.y });
-          scheduleReturn();
+          settle();
         } else if (event.key === "Escape") returnHome();
       }}
     >
