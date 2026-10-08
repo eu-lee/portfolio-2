@@ -3,6 +3,8 @@ node_modules/
 dist/
 coverage/
 *.tsbuildinfo
+.vite/
+public/.gitkeep
 
 # Local environment (keep shareable examples)
 .env
