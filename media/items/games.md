@@ -1,10 +1,8 @@
+---
 title: Games
 hoverLabel: Games
 image: games.png
 imageAlt: A collage of games, a keyboard, and a Nintendo Switch
-description: |-
-  Here are some of my favourite games:
-  > Valorant
 order: 1
 size: 140
 labelGap: 10
@@ -12,3 +10,11 @@ labelGap: 10
 initial:
   x: -646
   y: 608
+---
+
+Here are some of my favourite games
+
+- Valorant
+- CS2
+- League of Legends
+

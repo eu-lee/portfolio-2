@@ -13,7 +13,7 @@ export type ObjectItem = {
   initial: { x: number; y: number };
 };
 
-const metadata = import.meta.glob<string>("../../media/items/*.yaml", {
+const metadata = import.meta.glob<string>("../../media/items/*.md", {
   eager: true, query: "?raw", import: "default",
 });
 const images = import.meta.glob<string>("../../media/items/*.png", {
@@ -21,10 +21,13 @@ const images = import.meta.glob<string>("../../media/items/*.png", {
 });
 
 export const objects: ObjectItem[] = Object.entries(metadata).map(([path, source]) => {
-  const data = parse(source);
   const fail = (message: string): never => { throw new Error(`${path}: ${message}`); };
+  const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(source);
+  if (!frontmatter) return fail("Expected YAML frontmatter between --- delimiters.");
+  const data = parse(frontmatter[1]);
+  const description = source.slice(frontmatter[0].length).trim();
   if (!data || typeof data !== "object") fail("Expected item metadata.");
-  for (const key of ["title", "hoverLabel", "image", "imageAlt", "description"]) {
+  for (const key of ["title", "hoverLabel", "image", "imageAlt"]) {
     if (typeof data[key] !== "string" || !data[key].trim()) fail(`Missing or empty ${key}.`);
   }
   for (const key of ["order", "size", "labelGap"]) {
@@ -38,7 +41,8 @@ export const objects: ObjectItem[] = Object.entries(metadata).map(([path, source
   if (!image) fail(`Image not found: ${data.image}`);
   return {
     ...data,
-    id: path.split("/").pop()!.replace(/\.yaml$/, ""),
+    id: path.split("/").pop()!.replace(/\.md$/, ""),
+    description,
     image,
   } as ObjectItem;
 }).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));

@@ -1,9 +1,8 @@
+---
 title: Walnuts
 hoverLabel: Walnuts
 image: walnuts.png
 imageAlt: Two walnuts
-description: |-
-  More about walnuts coming soon.
 order: 2
 size: 120
 labelGap: 10
@@ -11,3 +10,6 @@ labelGap: 10
 initial:
   x: 583
   y: 659
+---
+
+More about walnuts coming soon.

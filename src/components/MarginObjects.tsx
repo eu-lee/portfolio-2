@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react";
+import Markdown from "react-markdown";
 import type { CSSProperties, PointerEvent } from "react";
 import { objects } from "../data/items";
 import type { ObjectItem } from "../data/items";
@@ -169,7 +170,7 @@ export function MarginObjects() {
             </form>
           </div>
           {selected && <img className="object-dialog-image" src={selected.image} alt={selected.imageAlt} />}
-          <p id="object-description">{selected?.description}</p>
+          <div id="object-description"><Markdown>{selected?.description ?? ""}</Markdown></div>
         </div>
       </dialog>
     </>
