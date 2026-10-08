@@ -1,18 +1,20 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
 import walnuts from "../../walnuts.png";
+import games from "../../games.png";
 
 type Point = { x: number; y: number };
 const objects = [
-  { id: "tile", label: "Object 01", side: "left", height: 0.3 },
+  { id: "games", label: "Games", side: "left", height: 0.3 },
   { id: "walnuts", label: "Walnuts", side: "right", height: 0.52 },
   { id: "stone", label: "Object 03", side: "left", height: 0.76 },
 ] as const;
 type ObjectItem = (typeof objects)[number];
 function objectSize(item: ObjectItem): number {
-  if (item.id !== "walnuts") return 48;
+  if (item.id === "stone") return 48;
   const gutter = document.querySelector(".page")?.getBoundingClientRect().left ?? 56;
-  return Math.max(48, Math.min(120, gutter - 8));
+  const maxSize = item.id === "games" ? 140 : 120;
+  return Math.max(48, Math.min(maxSize, gutter - 8));
 }
 const returnDelay = 3000;
 
@@ -152,8 +154,8 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
       }}
     >
       <span className="object-visual">
-      {item.id === "walnuts" ? (
-        <img className="object-shape" src={walnuts} alt="" draggable={false} />
+      {item.id !== "stone" ? (
+        <img className="object-shape object-image" src={item.id === "games" ? games : walnuts} alt="" draggable={false} />
       ) : (
         <span className="object-shape" aria-hidden="true" />
       )}
