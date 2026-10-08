@@ -183,6 +183,7 @@ export function MarginObjects() {
     setStackOrder((order) => order[order.length - 1] === id ? order : [...order.filter((entry) => entry !== id), id]);
   };
   const dialog = useRef<HTMLDialogElement>(null);
+  const dialogTitle = useRef<HTMLHeadingElement>(null);
 
   return (
     <>
@@ -190,14 +191,23 @@ export function MarginObjects() {
         {objects.map((item) => <MarginObject key={item.id} item={item} zIndex={5 + stackOrder.indexOf(item.id)} onRaise={() => raise(item.id)} onOpen={() => {
           setSelected(item);
           dialog.current?.showModal();
+          dialogTitle.current?.focus();
         }} />)}
       </aside>
       <dialog ref={dialog} className="object-dialog" aria-labelledby="object-title" aria-describedby="object-description" onClick={(event) => {
         if (event.target === event.currentTarget) dialog.current?.close();
       }}>
         <div className="object-dialog-content">
-          <form method="dialog"><button className="object-close" aria-label="Close details">×</button></form>
-          <h2 id="object-title">{selected?.label}</h2>
+          <div className="object-dialog-header">
+            <h2 ref={dialogTitle} id="object-title" tabIndex={-1}>{selected?.label}</h2>
+            <form method="dialog">
+              <button className="object-close" aria-label="Close details">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
+            </form>
+          </div>
           {selected && <img className="object-dialog-image" src={selected.image} alt={selected.label} />}
           <p id="object-description">More about {selected?.label.toLowerCase()} coming soon.</p>
         </div>
