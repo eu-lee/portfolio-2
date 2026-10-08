@@ -1,22 +1,27 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
+import walnuts from "../../walnuts.png";
 
 type Point = { x: number; y: number };
 const objects = [
   { id: "tile", label: "Object 01", side: "left", height: 0.3 },
-  { id: "ring", label: "Object 02", side: "right", height: 0.52 },
+  { id: "walnuts", label: "Walnuts", side: "right", height: 0.52 },
   { id: "stone", label: "Object 03", side: "left", height: 0.76 },
 ] as const;
 type ObjectItem = (typeof objects)[number];
-const size = 48;
+function objectSize(item: ObjectItem): number {
+  if (item.id !== "walnuts") return 48;
+  const gutter = document.querySelector(".page")?.getBoundingClientRect().left ?? 56;
+  return Math.max(48, Math.min(120, gutter - 8));
+}
 const returnDelay = 3000;
 
-function inMargin(point: Point): boolean {
+function inMargin(point: Point, size: number): boolean {
   const page = document.querySelector(".page")?.getBoundingClientRect();
   return !!page && (point.x + size <= page.left || point.x >= page.right);
 }
 
-function clampToViewport(point: Point): Point {
+function clampToViewport(point: Point, size: number): Point {
   return {
     x: Math.max(0, Math.min(window.innerWidth - size, point.x)),
     y: Math.max(0, Math.min(window.innerHeight - size, point.y)),
@@ -24,6 +29,7 @@ function clampToViewport(point: Point): Point {
 }
 
 function home(item: ObjectItem): Point {
+  const size = objectSize(item);
   const page = document.querySelector(".page")?.getBoundingClientRect();
   const gutter = page?.left ?? 56;
   return {
@@ -35,6 +41,7 @@ function home(item: ObjectItem): Point {
 function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }) {
   const [position, setPosition] = useState<Point | null>(null);
   const [dragging, setDragging] = useState(false);
+  const [size, setSize] = useState(48);
   const initialPosition = useRef<Point | null>(null);
   const lastMarginPosition = useRef<Point | null>(null);
   const currentPosition = useRef<Point | null>(null);
@@ -44,7 +51,7 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
 
   const clearReturn = () => clearTimeout(timer.current);
   const move = (point: Point) => {
-    const next = clampToViewport(point);
+    const next = clampToViewport(point, objectSize(item));
     currentPosition.current = next;
     setPosition(next);
   };
@@ -59,7 +66,7 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
   const settle = () => {
     clearReturn();
     const point = currentPosition.current;
-    if (point && inMargin(point)) lastMarginPosition.current = { ...point };
+    if (point && inMargin(point, objectSize(item))) lastMarginPosition.current = { ...point };
     else scheduleReturn();
   };
 
@@ -67,13 +74,15 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
     initialPosition.current = home(item);
     lastMarginPosition.current = { ...initialPosition.current };
     const reset = () => {
+      const size = objectSize(item);
+      setSize(size);
       clearTimeout(timer.current);
       drag.current = null;
       setDragging(false);
       // Preserve the last margin drop across resizes, keeping it outside the page.
-      const saved = clampToViewport(lastMarginPosition.current ?? home(item));
+      const saved = clampToViewport(lastMarginPosition.current ?? home(item), size);
       const page = document.querySelector(".page")?.getBoundingClientRect();
-      if (page && !inMargin(saved)) {
+      if (page && !inMargin(saved, size)) {
         saved.x = saved.x + size / 2 < window.innerWidth / 2
           ? Math.max(0, page.left - size)
           : Math.min(window.innerWidth - size, page.right);
@@ -108,10 +117,9 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
     <button
       type="button"
       className={`margin-object margin-object--${item.id}${dragging ? " is-dragging" : ""}`}
-      style={{ "--object-x": `${position.x}px`, "--object-y": `${position.y}px` } as CSSProperties}
+      style={{ "--object-size": `${size}px`, "--object-x": `${position.x}px`, "--object-y": `${position.y}px` } as CSSProperties}
       aria-label={`${item.label}: double-click or press Enter for details. Drag or use arrow keys to move.`}
       aria-haspopup="dialog"
-      title={`${item.label} · drag me, double-click to explore`}
       onPointerDown={(event) => {
         if (event.button !== 0 || !position || drag.current) return;
         clearReturn();
@@ -143,7 +151,23 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
         } else if (event.key === "Escape") returnHome();
       }}
     >
-      <span className="object-shape" aria-hidden="true" />
+      <span className="object-visual">
+      {item.id === "walnuts" ? (
+        <img className="object-shape" src={walnuts} alt="" draggable={false} />
+      ) : (
+        <span className="object-shape" aria-hidden="true" />
+      )}
+      <span
+        className="object-label"
+        aria-hidden="true"
+        style={{
+          left: Math.max(52 - position.x, Math.min(size / 2, window.innerWidth - position.x - 52)) - 4,
+          ...(position.y + size + 44 > window.innerHeight ? { top: "auto", bottom: "calc(100% + 6px)" } : {}),
+        }}
+      >
+        {item.label}
+      </span>
+      </span>
     </button>
   );
 }
