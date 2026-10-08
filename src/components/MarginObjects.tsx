@@ -1,0 +1,138 @@
+import { useEffect, useRef, useState } from "react";
+import type { CSSProperties, PointerEvent } from "react";
+
+type Point = { x: number; y: number };
+const objects = [
+  { id: "tile", label: "Object 01", side: "left", height: 0.3 },
+  { id: "ring", label: "Object 02", side: "right", height: 0.52 },
+  { id: "stone", label: "Object 03", side: "left", height: 0.76 },
+] as const;
+type ObjectItem = (typeof objects)[number];
+const size = 48;
+const returnDelay = 3000;
+
+function home(item: ObjectItem): Point {
+  const page = document.querySelector(".page")?.getBoundingClientRect();
+  const gutter = page?.left ?? 56;
+  return {
+    x: item.side === "left" ? Math.max(4, (gutter - size) / 2) : window.innerWidth - Math.max(4, (gutter - size) / 2) - size,
+    y: Math.max(8, Math.min(window.innerHeight - size - 8, window.innerHeight * item.height)),
+  };
+}
+
+function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }) {
+  const [position, setPosition] = useState<Point | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const drag = useRef<{ pointer: number; start: Point; origin: Point; moved: boolean } | null>(null);
+  const suppressDoubleClick = useRef(false);
+
+  const clearReturn = () => clearTimeout(timer.current);
+  const returnHome = () => {
+    clearReturn();
+    setPosition(home(item));
+  };
+  const scheduleReturn = () => {
+    clearReturn();
+    timer.current = setTimeout(returnHome, returnDelay);
+  };
+
+  useEffect(() => {
+    const reset = () => {
+      clearTimeout(timer.current);
+      drag.current = null;
+      setDragging(false);
+      setPosition(home(item));
+    };
+    reset();
+    window.addEventListener("resize", reset);
+    return () => {
+      clearTimeout(timer.current);
+      window.removeEventListener("resize", reset);
+    };
+  }, [item]);
+
+  const move = (point: Point) => setPosition({
+    x: Math.max(0, Math.min(window.innerWidth - size, point.x)),
+    y: Math.max(0, Math.min(window.innerHeight - size, point.y)),
+  });
+  const finishDrag = (event: PointerEvent<HTMLButtonElement>, cancelled = false) => {
+    const active = drag.current;
+    if (!active || active.pointer !== event.pointerId) return;
+    suppressDoubleClick.current = active.moved;
+    drag.current = null;
+    setDragging(false);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (cancelled) returnHome();
+    else scheduleReturn();
+  };
+
+  return (
+    <button
+      type="button"
+      className={`margin-object margin-object--${item.id}${dragging ? " is-dragging" : ""}`}
+      style={{ "--object-x": `${position?.x ?? 0}px`, "--object-y": `${position?.y ?? 0}px`, visibility: position ? "visible" : "hidden" } as CSSProperties}
+      aria-label={`${item.label}: double-click or press Enter for details. Drag or use arrow keys to move.`}
+      aria-haspopup="dialog"
+      title={`${item.label} · drag me, double-click to explore`}
+      onPointerDown={(event) => {
+        if (event.button !== 0 || !position || drag.current) return;
+        clearReturn();
+        drag.current = { pointer: event.pointerId, start: { x: event.clientX, y: event.clientY }, origin: position, moved: false };
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={(event) => {
+        const active = drag.current;
+        if (!active || active.pointer !== event.pointerId) return;
+        const dx = event.clientX - active.start.x;
+        const dy = event.clientY - active.start.y;
+        if (Math.hypot(dx, dy) > 5) active.moved = true;
+        if (!active.moved) return;
+        setDragging(true);
+        move({ x: active.origin.x + dx, y: active.origin.y + dy });
+      }}
+      onPointerUp={(event) => finishDrag(event)}
+      onPointerCancel={(event) => finishDrag(event, true)}
+      onLostPointerCapture={(event) => finishDrag(event, true)}
+      onDoubleClick={() => { if (!suppressDoubleClick.current) onOpen(); }}
+      onClick={(event) => { if (event.detail === 0) onOpen(); }}
+      onKeyDown={(event) => {
+        const directions: Record<string, Point> = { ArrowLeft: { x: -16, y: 0 }, ArrowRight: { x: 16, y: 0 }, ArrowUp: { x: 0, y: -16 }, ArrowDown: { x: 0, y: 16 } };
+        const direction = directions[event.key];
+        if (direction && position) {
+          event.preventDefault();
+          move({ x: position.x + direction.x, y: position.y + direction.y });
+          scheduleReturn();
+        } else if (event.key === "Escape") returnHome();
+      }}
+    >
+      <span className="object-shape" aria-hidden="true" />
+    </button>
+  );
+}
+
+export function MarginObjects() {
+  const [selected, setSelected] = useState<ObjectItem | null>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
+
+  return (
+    <>
+      <aside className="margin-objects" aria-label="Personal objects">
+        {objects.map((item) => <MarginObject key={item.id} item={item} onOpen={() => {
+          setSelected(item);
+          dialog.current?.showModal();
+        }} />)}
+      </aside>
+      <dialog ref={dialog} className="object-dialog" aria-labelledby="object-title" aria-describedby="object-description" onClick={(event) => {
+        if (event.target === event.currentTarget) dialog.current?.close();
+      }}>
+        <div className="object-dialog-content">
+          <form method="dialog"><button className="object-close" aria-label="Close details">×</button></form>
+          <p className="object-eyebrow">A personal object</p>
+          <h2 id="object-title">{selected?.label}</h2>
+          <p id="object-description">A placeholder for a personal object. Its story and significance will go here.</p>
+        </div>
+      </dialog>
+    </>
+  );
+}
