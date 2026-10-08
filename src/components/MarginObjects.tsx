@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
 
 type Point = { x: number; y: number };
@@ -63,7 +63,7 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
     else scheduleReturn();
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     initialPosition.current = home(item);
     lastMarginPosition.current = { ...initialPosition.current };
     const reset = () => {
@@ -101,11 +101,14 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
     else settle();
   };
 
+  // Mount at the calculated position so CSS never transitions from the origin.
+  if (!position) return null;
+
   return (
     <button
       type="button"
       className={`margin-object margin-object--${item.id}${dragging ? " is-dragging" : ""}`}
-      style={{ "--object-x": `${position?.x ?? 0}px`, "--object-y": `${position?.y ?? 0}px`, visibility: position ? "visible" : "hidden" } as CSSProperties}
+      style={{ "--object-x": `${position.x}px`, "--object-y": `${position.y}px` } as CSSProperties}
       aria-label={`${item.label}: double-click or press Enter for details. Drag or use arrow keys to move.`}
       aria-haspopup="dialog"
       title={`${item.label} · drag me, double-click to explore`}
