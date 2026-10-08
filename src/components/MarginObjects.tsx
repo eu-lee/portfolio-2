@@ -40,7 +40,7 @@ function home(item: ObjectItem): Point {
   };
 }
 
-function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }) {
+function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onOpen: () => void; onRaise: () => void; zIndex: number }) {
   const [position, setPosition] = useState<Point | null>(null);
   const [dragging, setDragging] = useState(false);
   const [size, setSize] = useState(48);
@@ -109,7 +109,10 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
     setDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     if (cancelled) returnHome();
-    else settle();
+    else {
+      if (active.moved) onRaise();
+      settle();
+    }
   };
 
   // Mount at the calculated position so CSS never transitions from the origin.
@@ -119,11 +122,12 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
     <button
       type="button"
       className={`margin-object margin-object--${item.id}${dragging ? " is-dragging" : ""}`}
-      style={{ "--object-size": `${size}px`, "--object-x": `${position.x}px`, "--object-y": `${position.y}px` } as CSSProperties}
+      style={{ zIndex, "--object-size": `${size}px`, "--object-x": `${position.x}px`, "--object-y": `${position.y}px` } as CSSProperties}
       aria-label={`${item.label}: double-click or press Enter for details. Drag or use arrow keys to move.`}
       aria-haspopup="dialog"
       onPointerDown={(event) => {
         if (event.button !== 0 || !position || drag.current) return;
+        onRaise();
         clearReturn();
         drag.current = { pointer: event.pointerId, start: { x: event.clientX, y: event.clientY }, origin: position, moved: false };
         event.currentTarget.setPointerCapture(event.pointerId);
@@ -148,6 +152,7 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
         const direction = directions[event.key];
         if (direction && position) {
           event.preventDefault();
+          onRaise();
           move({ x: position.x + direction.x, y: position.y + direction.y });
           settle();
         } else if (event.key === "Escape") returnHome();
@@ -164,7 +169,7 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
         aria-hidden="true"
         style={{
           left: Math.max(52 - position.x, Math.min(size / 2, window.innerWidth - position.x - 52)) - 4,
-          ...(position.y + size + 44 > window.innerHeight ? { top: "auto", bottom: "calc(100% + 6px)" } : {}),
+          ...(position.y + size + 44 > window.innerHeight ? { top: "auto", bottom: "calc(100% + 10px)" } : {}),
         }}
       >
         {item.label}
@@ -176,12 +181,16 @@ function MarginObject({ item, onOpen }: { item: ObjectItem; onOpen: () => void }
 
 export function MarginObjects() {
   const [selected, setSelected] = useState<ObjectItem | null>(null);
+  const [stackOrder, setStackOrder] = useState(() => objects.map((item) => item.id));
+  const raise = (id: ObjectItem["id"]) => {
+    setStackOrder((order) => order[order.length - 1] === id ? order : [...order.filter((entry) => entry !== id), id]);
+  };
   const dialog = useRef<HTMLDialogElement>(null);
 
   return (
     <>
       <aside className="margin-objects" aria-label="Personal objects">
-        {objects.map((item) => <MarginObject key={item.id} item={item} onOpen={() => {
+        {objects.map((item) => <MarginObject key={item.id} item={item} zIndex={5 + stackOrder.indexOf(item.id)} onRaise={() => raise(item.id)} onOpen={() => {
           setSelected(item);
           dialog.current?.showModal();
         }} />)}
