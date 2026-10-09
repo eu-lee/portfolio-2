@@ -8,7 +8,7 @@ type Point = { x: number; y: number };
 // Coordinates are fixed CSS pixels relative to the page's horizontal center.
 const layoutWidth = 1512;
 const layoutHeight = 856;
-const returnDelay = 1500;
+const returnDelay = 5000;
 
 function inMargin(point: Point, size: number): boolean {
   const page = document.querySelector(".page")?.getBoundingClientRect();
@@ -32,7 +32,7 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
   const currentPosition = useRef<Point | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const drag = useRef<{ pointer: number; start: Point; origin: Point; moved: boolean } | null>(null);
-  const suppressDoubleClick = useRef(false);
+  const suppressClick = useRef(false);
 
   const clearReturn = () => clearTimeout(timer.current);
   const move = (point: Point) => {
@@ -66,7 +66,7 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
   const finishDrag = (event: PointerEvent<HTMLButtonElement>, cancelled = false) => {
     const active = drag.current;
     if (!active || active.pointer !== event.pointerId) return;
-    suppressDoubleClick.current = active.moved;
+    suppressClick.current = cancelled || active.moved;
     drag.current = null;
     setDragging(false);
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
@@ -85,10 +85,11 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
       type="button"
       className={`margin-object margin-object--${item.id}${dragging ? " is-dragging" : ""}`}
       style={{ zIndex, "--object-label-gap": `${item.labelGap}px`, "--object-size": `${size}px`, "--object-x": `${position.x}px`, "--object-y": `${position.y}px` } as CSSProperties}
-      aria-label={`${item.hoverLabel}: double-click or press Enter for details. Drag or use arrow keys to move.`}
+      aria-label={`${item.hoverLabel}: Click or press Enter for details. Drag or use arrow keys to move.`}
       aria-haspopup="dialog"
       onPointerDown={(event) => {
         if (event.button !== 0 || !position || drag.current) return;
+        suppressClick.current = false;
         onRaise();
         clearReturn();
         drag.current = { pointer: event.pointerId, start: { x: event.pageX, y: event.pageY }, origin: position, moved: false };
@@ -107,8 +108,11 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
       onPointerUp={(event) => finishDrag(event)}
       onPointerCancel={(event) => finishDrag(event, true)}
       onLostPointerCapture={(event) => finishDrag(event, true)}
-      onDoubleClick={() => { if (!suppressDoubleClick.current) onOpen(); }}
-      onClick={(event) => { if (event.detail === 0) onOpen(); }}
+      onClick={(event) => {
+        // Keyboard activation still works after a drag; pointer clicks only open
+        // when the gesture stayed within the 5px movement threshold.
+        if (event.detail === 0 || !suppressClick.current) onOpen();
+      }}
       onKeyDown={(event) => {
         const directions: Record<string, Point> = { ArrowLeft: { x: -16, y: 0 }, ArrowRight: { x: 16, y: 0 }, ArrowUp: { x: 0, y: -16 }, ArrowDown: { x: 0, y: 16 } };
         const direction = directions[event.key];
@@ -139,29 +143,40 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
 
 export function MarginObjects() {
   const [selected, setSelected] = useState<ObjectItem | null>(null);
+  const [closing, setClosing] = useState(false);
   const [stackOrder, setStackOrder] = useState(() => objects.map((item) => item.id));
   const raise = (id: ObjectItem["id"]) => {
     setStackOrder((order) => order[order.length - 1] === id ? order : [...order.filter((entry) => entry !== id), id]);
   };
   const dialog = useRef<HTMLDialogElement>(null);
   const dialogTitle = useRef<HTMLHeadingElement>(null);
+  const closeDialog = () => {
+    if (!dialog.current?.open || closing) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) dialog.current.close();
+    else setClosing(true);
+  };
 
   return (
     <>
       <aside className="margin-objects" aria-label="Personal objects">
         {objects.map((item) => <MarginObject key={item.id} item={item} zIndex={5 + stackOrder.indexOf(item.id)} onRaise={() => raise(item.id)} onOpen={() => {
           setSelected(item);
+          setClosing(false);
           dialog.current?.showModal();
           dialogTitle.current?.focus();
         }} />)}
       </aside>
-      <dialog ref={dialog} className="object-dialog" aria-labelledby="object-title" aria-describedby="object-description" onClick={(event) => {
-        if (event.target === event.currentTarget) dialog.current?.close();
-      }}>
+      <dialog ref={dialog} className={`object-dialog${closing ? " is-closing" : ""}`} aria-labelledby="object-title" aria-describedby="object-description"
+        onCancel={(event) => { event.preventDefault(); closeDialog(); }}
+        onClose={() => setClosing(false)}
+        onAnimationEnd={(event) => {
+          if (event.target === event.currentTarget && event.animationName === "object-dialog-out") dialog.current?.close();
+        }}
+        onClick={(event) => { if (event.target === event.currentTarget) closeDialog(); }}>
         <div className="object-dialog-content">
           <div className="object-dialog-header">
             <h2 ref={dialogTitle} id="object-title" tabIndex={-1}>{selected?.title}</h2>
-            <form method="dialog">
+            <form method="dialog" onSubmit={(event) => { event.preventDefault(); closeDialog(); }}>
               <button className="object-close" aria-label="Close details">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                   <path d="M6 6l12 12M18 6L6 18" />

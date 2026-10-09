@@ -12,9 +12,4 @@ initial:
   y: 608
 ---
 
-Here are some of my current favourite games
-
-- Slay the Spire 2
-- CS 2
-
-
+Currently, I enjoy playing Slay the Spire 2 and CS 2!

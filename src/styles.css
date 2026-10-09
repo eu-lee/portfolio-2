@@ -121,6 +121,22 @@ footer { padding: 0 0 32px; color: #706b62; font-size: 0.875rem; }
 }
 .object-dialog { width: min(560px, calc(100% - 40px)); height: 580px; max-height: calc(100dvh - 48px); overflow: auto; padding: 0; border: 1px solid #dedbd3; border-radius: 18px; color: inherit; background: #faf9f6; box-shadow: 0 24px 80px rgb(41 40 35 / 15%); }
 .object-dialog::backdrop { background: rgb(41 40 35 / 25%); backdrop-filter: blur(4px); }
+.object-dialog[open] { animation: object-dialog-in 240ms cubic-bezier(.22, 1, .36, 1) both; }
+.object-dialog[open]::backdrop { animation: object-backdrop-in 240ms ease-out both; }
+.object-dialog[open].is-closing { animation: object-dialog-out 180ms ease-in both; }
+.object-dialog[open].is-closing::backdrop { animation: object-backdrop-in 180ms ease-in reverse both; }
+@keyframes object-dialog-in {
+  from { opacity: 0; transform: translateY(10px) scale(.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes object-dialog-out {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(6px) scale(.97); }
+}
+@keyframes object-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
 .object-dialog-content { position: relative; --dialog-padding: clamp(24px, 5vw, 40px); padding: calc(var(--dialog-padding) - 16px) var(--dialog-padding) var(--dialog-padding); }
 .object-dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
 .object-dialog-header form { margin: 0; flex: none; }
@@ -143,4 +159,6 @@ footer { padding: 0 0 32px; color: #706b62; font-size: 0.875rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .margin-object, .object-shape, .object-label { transition: none; }
+  .object-dialog[open], .object-dialog[open]::backdrop,
+  .object-dialog[open].is-closing, .object-dialog[open].is-closing::backdrop { animation-duration: 0.01ms; }
 }
