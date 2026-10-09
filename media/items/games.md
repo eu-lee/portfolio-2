@@ -12,4 +12,6 @@ initial:
   y: 608
 ---
 
+Gaming is pretty important to me. It's a major contributor to my interest in Software Engineering -- some of my earliest programming experience comes from making silly games on Scratch, and later on Unity. 
+
 Currently, I enjoy playing Slay the Spire 2 and CS 2!
