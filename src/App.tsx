@@ -1,5 +1,5 @@
 import { Hero } from "./components/Hero";
-import { PersonalTable } from "./components/PersonalTable";
+import { MarginObjects } from "./components/MarginObjects";
 
 export default function App() {
   return (
@@ -16,10 +16,10 @@ export default function App() {
             <h2 id="experience-heading">Work experience</h2>
             <p className="empty-state">Work experience coming soon.</p>
           </section>
-          <PersonalTable />
         </main>
         <footer>Eugene</footer>
       </div>
+      <MarginObjects />
     </>
   );
 }
