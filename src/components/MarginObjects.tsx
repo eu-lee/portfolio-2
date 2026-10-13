@@ -4,45 +4,39 @@ import type { CSSProperties, PointerEvent } from "react";
 import { objects } from "../data/items";
 import type { ObjectItem } from "../data/items";
 
-type Point = { x: number; y: number };
-// Coordinates are fixed CSS pixels relative to the page's horizontal center.
-const layoutWidth = 1512;
-const layoutHeight = 856;
+import { clampPosition, isMargin } from "../lib/itemLayout";
+import type { Point, ItemLayout } from "../lib/itemLayout";
+
 const returnDelay = 5000;
 
-function inMargin(point: Point, size: number): boolean {
-  const page = document.querySelector(".page")?.getBoundingClientRect();
-  const x = document.documentElement.clientWidth / 2 + point.x - window.scrollX;
-  return !!page && (x + size <= page.left || x >= page.right);
-}
-
-function clampToLayout(point: Point, size: number): Point {
-  return {
-    x: Math.max(-layoutWidth / 2, Math.min(layoutWidth / 2 - size, point.x)),
-    y: Math.max(0, Math.min(layoutHeight - size, point.y)),
-  };
+function readLayout(): ItemLayout {
+  return { width: document.body.clientWidth, height: Math.max(200, window.innerHeight) };
 }
 
 function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onOpen: () => void; onRaise: () => void; zIndex: number }) {
   const [position, setPosition] = useState<Point | null>(null);
   const [dragging, setDragging] = useState(false);
   const size = item.size;
+  const layout = useRef<ItemLayout>({ width: 680, height: 856 });
+  const [viewport, setViewport] = useState({ left: 0, top: 0, width: 0, height: 0 });
   const initialPosition = useRef<Point | null>(null);
   const lastMarginPosition = useRef<Point | null>(null);
   const currentPosition = useRef<Point | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const drag = useRef<{ pointer: number; start: Point; origin: Point; moved: boolean } | null>(null);
+  const drag = useRef<{ pointer: number; start: Point; latest: Point; origin: Point; moved: boolean } | null>(null);
   const suppressClick = useRef(false);
 
   const clearReturn = () => clearTimeout(timer.current);
   const move = (point: Point) => {
-    const next = clampToLayout(point, size);
+    const next = clampPosition(point, size, layout.current);
     currentPosition.current = next;
     setPosition(next);
   };
   const returnHome = () => {
     clearReturn();
-    move(lastMarginPosition.current ?? initialPosition.current ?? { ...item.initial });
+    const home = lastMarginPosition.current ?? initialPosition.current ?? { ...item.initial };
+    currentPosition.current = home;
+    setPosition(home);
   };
   const scheduleReturn = () => {
     clearReturn();
@@ -51,16 +45,28 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
   const settle = () => {
     clearReturn();
     const point = currentPosition.current;
-    if (point && inMargin(point, size)) lastMarginPosition.current = { ...point };
+    if (point && isMargin(point, size, layout.current)) lastMarginPosition.current = { ...point };
     else scheduleReturn();
   };
 
   useLayoutEffect(() => {
     initialPosition.current = { ...item.initial };
-    lastMarginPosition.current = { ...initialPosition.current };
+    lastMarginPosition.current = { ...item.initial };
     currentPosition.current = { ...item.initial };
     setPosition({ ...item.initial });
-    return () => clearTimeout(timer.current);
+    const updateLayout = () => {
+      layout.current = readLayout();
+      setViewport({ left: window.scrollX, top: window.scrollY,
+        width: document.documentElement.clientWidth, height: window.innerHeight });
+    };
+    updateLayout();
+    window.addEventListener("resize", updateLayout);
+    window.addEventListener("scroll", updateLayout, { passive: true });
+    return () => {
+      clearTimeout(timer.current);
+      window.removeEventListener("resize", updateLayout);
+      window.removeEventListener("scroll", updateLayout);
+    };
   }, [item]);
 
   const finishDrag = (event: PointerEvent<HTMLButtonElement>, cancelled = false) => {
@@ -79,6 +85,9 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
 
   // Mount at the calculated position so CSS never transitions from the origin.
   if (!position) return null;
+  const screenX = layout.current.width / 2 + position.x - viewport.left;
+  const screenY = position.y - viewport.top;
+  if (screenX < 0 || screenY < 0 || screenX + size > viewport.width || screenY + size > viewport.height) return null;
 
   return (
     <button
@@ -92,12 +101,13 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
         suppressClick.current = false;
         onRaise();
         clearReturn();
-        drag.current = { pointer: event.pointerId, start: { x: event.pageX, y: event.pageY }, origin: position, moved: false };
+        drag.current = { pointer: event.pointerId, start: { x: event.pageX, y: event.pageY }, latest: { x: event.pageX, y: event.pageY }, origin: position, moved: false };
         event.currentTarget.setPointerCapture(event.pointerId);
       }}
       onPointerMove={(event) => {
         const active = drag.current;
         if (!active || active.pointer !== event.pointerId) return;
+        active.latest = { x: event.pageX, y: event.pageY };
         const dx = event.pageX - active.start.x;
         const dy = event.pageY - active.start.y;
         if (Math.hypot(dx, dy) > 5) active.moved = true;
@@ -130,8 +140,8 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
         className="object-label"
         aria-hidden="true"
         style={{
-          left: Math.max(52 - layoutWidth / 2 - position.x, Math.min(size / 2, layoutWidth / 2 - position.x - 52)) - 4,
-          ...(position.y + size + 44 > layoutHeight ? { top: "auto", bottom: "calc(100% + var(--object-label-gap, 10px))" } : {}),
+          left: Math.max(52 - layout.current.width / 2 - position.x, Math.min(size / 2, layout.current.width / 2 - position.x - 52)) - 4,
+          ...(position.y + size + 44 > layout.current.height ? { top: "auto", bottom: "calc(100% + var(--object-label-gap, 10px))" } : {}),
         }}
       >
         {item.hoverLabel}
