@@ -240,16 +240,6 @@ export function BrickCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvasContext(canvas);
-    if (canvas.width !== deviceWidth || canvas.height !== deviceHeight) {
-      canvas.width = deviceWidth;
-      canvas.height = deviceHeight;
-    }
-    // Draw straight in device pixels: `cell` is a whole number of them and every
-    // stud sits at x*cell / y*cell, so the wall tiles seamlessly (no azure bleed)
-    // and blits 1:1 with no resampling. Smoothing off as belt-and-suspenders.
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.imageSmoothingEnabled = false;
-
     function getSprite(hex: `#${string}`) {
       const cached = spriteRef.current.cache.get(hex);
       if (cached) return cached;
@@ -285,16 +275,36 @@ export function BrickCanvas({
       spriteRef.current = { cache: new Map(), key };
     }
 
-    const drawFrame = (source: CanvasImageSource) => {
+    const drawFrame = (source: HTMLVideoElement) => {
+      // loadeddata happened once, but a seek/resize can temporarily leave the
+      // decoder without a current frame. Keep the last rendered image intact.
+      if (source.readyState < HTMLMediaElement.HAVE_CURRENT_DATA || source.seeking) return;
       sctx.clearRect(0, 0, columns, rows);
-      sctx.drawImage(
-        source,
-        (columns - dw) * clampedFocalX + panStuds,
-        (rows - dh) * clampedFocalY,
-        dw,
-        dh
-      );
+      try {
+        sctx.drawImage(
+          source,
+          (columns - dw) * clampedFocalX + panStuds,
+          (rows - dh) * clampedFocalY,
+          dw,
+          dh
+        );
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "InvalidStateError") return;
+        throw error;
+      }
       const pixels = sctx.getImageData(0, 0, columns, rows).data;
+      // A video draw can silently produce no pixels. Do not interpret a
+      // transparent sampler as a black video frame (opaque black is valid).
+      if (!pixels.some((value, index) => index % 4 === 3 && value > 0)) return;
+
+      // Resizing clears the bitmap, so defer it until we can replace it in the
+      // same task. CSS stretches the previous bitmap while decoding recovers.
+      if (canvas.width !== deviceWidth || canvas.height !== deviceHeight) {
+        canvas.width = deviceWidth;
+        canvas.height = deviceHeight;
+      }
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.imageSmoothingEnabled = false;
       const darken = Math.max(0, Math.min(0.9, mediaDarken));
       const darkenFactor = 1 - darken;
 
@@ -330,35 +340,44 @@ export function BrickCanvas({
 
     const tick = (time: number) => {
       if (stopped) return;
-      if (time - lastDraw >= frameMs) {
-        drawFrame(media as CanvasImageSource);
-        lastDraw = time;
+      try {
+        if (time - lastDraw >= frameMs) {
+          drawFrame(media);
+          lastDraw = time;
+        }
+      } finally {
+        animationFrame = requestAnimationFrame(tick);
       }
-      animationFrame = requestAnimationFrame(tick);
     };
 
     const videoMedia = media as VideoFrameElement;
-    drawFrame(videoMedia);
     const scheduleVideoFrame = () => {
       if (stopped) return;
       if (typeof videoMedia.requestVideoFrameCallback === "function") {
         cancelVideoFrame = videoMedia.cancelVideoFrameCallback?.bind(videoMedia);
         videoFrame = videoMedia.requestVideoFrameCallback((time: number) => {
           if (stopped) return;
-          if (time - lastDraw >= frameMs) {
-            drawFrame(videoMedia);
-            lastDraw = time;
+          try {
+            if (time - lastDraw >= frameMs) {
+              drawFrame(videoMedia);
+              lastDraw = time;
+            }
+          } finally {
+            scheduleVideoFrame();
           }
-          scheduleVideoFrame();
         });
       } else {
         animationFrame = requestAnimationFrame(tick);
       }
     };
     scheduleVideoFrame();
+    const initialFrame = requestAnimationFrame(() => {
+      if (!stopped) drawFrame(videoMedia);
+    });
 
     return () => {
       stopped = true;
+      cancelAnimationFrame(initialFrame);
       if (animationFrame) cancelAnimationFrame(animationFrame);
       if (videoFrame && cancelVideoFrame) {
         cancelVideoFrame(videoFrame);
