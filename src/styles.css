@@ -79,9 +79,6 @@ main { margin-top: clamp(28px, 8.235294cqw, 56px); }
 .projects-back { display: inline-flex; align-items: center; gap: 8px; }
 .projects-page main { margin-top: 32px; margin-bottom: 64px; }
 .projects-page h1 { margin-bottom: 24px; font-size: 1.75rem; font-weight: 500; letter-spacing: -0.025em; }
-@media (max-width: 600px) {
-  .project-grid { grid-template-columns: 1fr; }
-}
 .section { margin-bottom: clamp(32px, 9.411765cqw, 64px); }
 .empty-state { margin-top: clamp(12px, 2.941176cqw, 20px); padding-block: clamp(16px, 3.529412cqw, 24px); border-top: 1px solid #dedbd3; color: #706b62; }
 :focus-visible { outline: 2px solid #526b4c; outline-offset: 5px; }
