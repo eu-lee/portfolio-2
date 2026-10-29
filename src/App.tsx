@@ -1,5 +1,4 @@
 import { Hero } from "./components/Hero";
-import { MarginObjects } from "./components/MarginObjects";
 
 export default function App() {
   return (
@@ -19,7 +18,6 @@ export default function App() {
         </main>
         <footer>Eugene</footer>
       </div>
-      <MarginObjects />
     </>
   );
 }
