@@ -1,7 +1,7 @@
 :root {
   font-family: "Space Grotesk", sans-serif;
   color: #292823;
-  background: #faf9f6;
+  background-color: #f5f0e6;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -14,8 +14,9 @@ h1, h2, p { margin: 0; }
 h2 { font-size: 1rem; font-weight: 500; letter-spacing: -0.015em; }
 .page { width: min(680px, calc(100% - 32px)); margin-inline: auto; overflow-wrap: anywhere; container-type: inline-size; }
 .page main, .page h2 { font-size: clamp(0.875rem, 2.352941cqw, 1rem); }
-.hero { padding-top: clamp(24px, 7.058824cqw, 48px); }
-.hero-media { position: relative; width: 100%; min-height: 192px; aspect-ratio: 21 / 9; border-radius: 24px; corner-shape: squircle; overflow: hidden; background: #000; }
+.hero, .page > main, .page > footer { width: min(100%, 620px); margin-inline: auto; }
+.hero { padding-top: clamp(16px, 4.705882cqw, 32px); }
+.hero-media { position: relative; width: 100%; min-height: 192px; aspect-ratio: 8 / 3; border-radius: 24px; corner-shape: squircle; overflow: hidden; background: #000; }
 .hero-media::after {
   content: "";
   position: absolute;
@@ -41,23 +42,25 @@ h2 { font-size: 1rem; font-weight: 500; letter-spacing: -0.015em; }
 }
 .hero-name {
   font-family: "Instrument Serif", Georgia, serif;
-  font-size: clamp(2rem, 10.588235cqw, 4.5rem);
+  font-size: clamp(2rem, 9.411765cqw, 4rem);
   font-weight: 400;
   letter-spacing: -0.025em;
   line-height: 1;
 }
 .brick-canvas { position: absolute; z-index: 1; transform: translateZ(0); backface-visibility: hidden; }
-.hero-details { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; margin-top: 6px; margin-inline: clamp(12px, 2.941176cqw, 20px); }
-.hero-tagline { font-size: clamp(0.875rem, 2.352941cqw, 1rem); line-height: 1.5; color: #706b62; }
+.hero-bio { margin-top: 16px; font-size: clamp(0.875rem, 2.352941cqw, 1rem); line-height: 1.65; color: #706b62; }
+.hero-bio p + p { margin-top: 4px; }
+.hero-bio a { color: #292823; text-decoration-color: #aaa396; text-underline-offset: 3px; }
+.hero-bio a:hover { text-decoration-color: currentColor; }
 .social-links { display: flex; align-items: center; gap: 8px; }
 .social-links a { display: grid; place-items: center; width: 32px; height: 32px; color: #706b62; border-radius: 6px; }
 .social-links a:hover, .social-links a:focus-visible { color: #292823; background: #eeece5; }
 .social-links svg { width: 18px; height: 18px; }
 .brick-media-source { position: absolute; inset: 0 auto auto 0; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; }
 .hero-video-fallback { position: absolute; inset: 0; display: grid; place-items: center; color: #bdb9b0; font-size: 0.875rem; }
-main { margin-top: clamp(28px, 8.235294cqw, 56px); }
-.section { margin-bottom: clamp(32px, 9.411765cqw, 64px); }
-.empty-state { margin-top: clamp(12px, 2.941176cqw, 20px); padding-block: clamp(16px, 3.529412cqw, 24px); border-top: 1px solid #dedbd3; color: #706b62; }
+main { margin-top: clamp(20px, 4.705882cqw, 32px); }
+.section { margin-bottom: clamp(24px, 5.882353cqw, 40px); }
+.empty-state { margin-top: clamp(8px, 1.764706cqw, 12px); padding-block: clamp(10px, 1.764706cqw, 12px); border-top: 1px solid #dedbd3; color: #706b62; }
 footer { padding: 0 0 32px; color: #706b62; font-size: clamp(0.75rem, 2.058824cqw, 0.875rem); }
 :focus-visible { outline: 2px solid #526b4c; outline-offset: 5px; }
 .skip-link { position: absolute; top: 12px; left: 20px; padding: 8px 12px; background: #faf9f6; color: inherit; transform: translateY(-200%); }
