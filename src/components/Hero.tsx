@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { BrickCanvas } from "./BrickCanvas";
-import { SocialLinks } from "./SocialLinks";
 import { useStudGrid } from "../lib/heroGrid";
 import headerVideo from "../../media/bkg.mp4";
 
@@ -16,9 +15,13 @@ export function Hero() {
           <h1 className="hero-name">Eugene Lee</h1>
         </div>
       </div>
-      <div className="hero-details">
-        <p className="hero-tagline">SE @ UWaterloo</p>
-        <SocialLinks />
+      <div className="hero-bio">
+        <p>I study software engineering at the University of Waterloo.</p>
+        <p>
+          Feel free to reach out to me on{" "}
+          <a href="https://www.linkedin.com/in/eu-lee/" target="_blank" rel="noreferrer">LinkedIn</a>
+          {" "}or by <a href="mailto:eugene.lee@uwaterloo.ca">email</a>.
+        </p>
       </div>
     </header>
   );
