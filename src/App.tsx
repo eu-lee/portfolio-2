@@ -1,4 +1,5 @@
 import { Hero } from "./components/Hero";
+import { Projects } from "./components/Projects";
 
 export default function App() {
   return (
@@ -7,10 +8,7 @@ export default function App() {
       <div className="page">
         <Hero />
         <main id="content" tabIndex={-1}>
-          <section className="section" aria-labelledby="projects-heading">
-            <h2 id="projects-heading">Projects</h2>
-            <p className="empty-state">Selected projects coming soon.</p>
-          </section>
+          <Projects />
           <section className="section" aria-labelledby="experience-heading">
             <h2 id="experience-heading">Work experience</h2>
             <p className="empty-state">Work experience coming soon.</p>
