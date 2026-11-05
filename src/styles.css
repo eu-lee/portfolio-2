@@ -1,5 +1,5 @@
 :root {
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "DM Sans", sans-serif;
   color: #292823;
   background-color: #f5f0e6;
   font-synthesis: none;
@@ -95,7 +95,7 @@ footer { padding: 0 0 32px; color: #706b62; font-size: clamp(0.75rem, 2.058824cq
   border-radius: 999px;
   background: #faf9f6;
   color: #514c43;
-  font-family: "Space Grotesk", sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 12px;
   font-weight: 500;
   line-height: 1.5;
