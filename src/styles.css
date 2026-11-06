@@ -203,4 +203,4 @@ footer { padding: 0 0 28px; color: #706b62; font-size: 13px; line-height: 1.55; 
   .object-dialog[open].is-closing, .object-dialog[open].is-closing::backdrop { animation-duration: 0.01ms; }
 }
 
-.project-caption .project-list-meta { margin-top: 5px; font-size: 12px; line-height: 1.5; color: #817b71; }
+.project-caption .project-list-meta { margin-top: 2px; font-size: 12px; line-height: 1.5; color: #817b71; }
