@@ -10,6 +10,8 @@ links:
     href: "https://eugpt.chat"
   - label: Github
     href: "https://github.com/eu-lee/slm"
+  - label: Youtube
+    href: "https://www.youtube.com/watch?v=OPZbVnz5de8"
 ---
 
 EuGPT is a ~36M parameter GPT-style small language model I built and trained from scratch, then deployed as a full ChatGPT-style web app. The model is a 6-layer transformer with 8 attention heads, a 512 embedding dimension, and a custom 16,387-token BPE tokenizer, trained on the TinyChat dataset.
