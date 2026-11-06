@@ -28,7 +28,7 @@ export function ProjectPage({ project }: { project: Project }) {
           <nav className="project-links" aria-label="Project links">
             {project.links.map((link) => (
               <a key={link.href} href={link.href} target="_blank" rel="noreferrer">
-                {link.label} <span aria-hidden="true">↗</span>
+                <span className="project-link-label">{link.label}</span>
               </a>
             ))}
           </nav>

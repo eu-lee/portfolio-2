@@ -10,7 +10,7 @@ export function Projects() {
               <ProjectImage src={project.thumbnail} alt="" loading="lazy" />
             </div>
             <div className="project-caption">
-              <h3 className="project-title">{project.title}<span className="project-arrow" aria-hidden="true">↗</span></h3>
+              <h3 className="project-title">{project.title}</h3>
               {project.summary && <p>{project.summary}</p>}
             </div>
           </a>
