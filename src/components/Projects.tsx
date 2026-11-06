@@ -2,8 +2,6 @@ import { projects } from "../data/projects";
 
 export function Projects() {
   return (
-    <section className="section" aria-labelledby="projects-heading">
-      <h2 id="projects-heading">Projects</h2>
       <div className="project-grid">
         {projects.map((project) => (
           <a className="project-card" key={project.id} href={project.links[0].href}
@@ -18,6 +16,5 @@ export function Projects() {
           </a>
         ))}
       </div>
-    </section>
   );
 }
