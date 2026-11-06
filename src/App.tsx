@@ -23,7 +23,6 @@ export default function App() {
           <PortfolioTabs />
         </main>
         </>}
-        <footer>Eugene</footer>
       </div>
     </>
   );

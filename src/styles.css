@@ -14,7 +14,7 @@ h1, h2, p { margin: 0; }
 h2 { font-size: 1rem; font-weight: 500; letter-spacing: -0.015em; }
 .page { width: min(680px, calc(100% - 32px)); margin-inline: auto; overflow-wrap: anywhere; container-type: inline-size; }
 .page main, .page h2 { font-size: clamp(0.875rem, 2.352941cqw, 1rem); }
-.hero, .page > main, .page > footer { width: min(100%, 620px); margin-inline: auto; }
+.hero, .page > main { width: min(100%, 620px); margin-inline: auto; }
 .hero { padding-top: clamp(16px, 4.705882cqw, 32px); }
 .hero-media { position: relative; width: 100%; min-height: 192px; aspect-ratio: 8 / 3; border-radius: 24px; corner-shape: squircle; overflow: hidden; background: #000; }
 .hero-media::after {
@@ -61,7 +61,6 @@ h2 { font-size: 1rem; font-weight: 500; letter-spacing: -0.015em; }
 main { margin-top: clamp(20px, 4.117647cqw, 28px); }
 .section { margin-bottom: clamp(24px, 4.705882cqw, 32px); }
 .empty-state { margin-top: clamp(8px, 1.764706cqw, 12px); padding-block: clamp(10px, 1.764706cqw, 12px); border-top: 1px solid #dedbd3; color: #706b62; }
-footer { padding: 0 0 28px; color: #706b62; font-size: 13px; line-height: 1.55; }
 .portfolio-tablist { position: relative; display: flex; gap: 24px; overflow-x: auto; white-space: nowrap; border-bottom: 1px solid #dedbd3; }
 .portfolio-tab { flex: none; padding: 0 0 10px; border: 0; background: transparent; color: #706b62; font: inherit; font-size: 15px; line-height: 1.5; font-weight: 400; letter-spacing: -0.015em; cursor: pointer; }
 .portfolio-tab[aria-selected="true"] { color: #292823; font-weight: 500; }
