@@ -12,6 +12,11 @@ export function Projects() {
             <div className="project-caption">
               <h3 className="project-title">{project.title}</h3>
               {project.summary && <p>{project.summary}</p>}
+              <p className="project-list-meta">
+                <time dateTime={project.date}>{new Intl.DateTimeFormat("en", {
+                  month: "long", year: "numeric", timeZone: "UTC",
+                }).format(new Date(project.date))}</time>
+              </p>
             </div>
           </a>
         ))}
