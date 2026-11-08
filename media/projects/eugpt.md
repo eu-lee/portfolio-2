@@ -1,22 +1,17 @@
 ---
 order: 
 title: EuGPT
+summary: A ~36M parameter language model.
 date: 2026-02
 featured: false
 cover: https://www.youtube.com/watch?v=OPZbVnz5de8
-summary: A ~36M parameter language model.
 links:
   - label: Live Site
     href: "https://eugpt.chat"
   - label: Github
     href: "https://github.com/eu-lee/slm"
-technologies:
-  - PyTorch
-  - Python
-  - FastAPI
-  - Next.js
-  - Docker
-  - PostgreSQL
+  - label: Youtube
+    href: "https://www.youtube.com/watch?v=OPZbVnz5de8"
 ---
 
 EuGPT is a ~36M parameter GPT-style small language model I built and trained from scratch, then deployed as a full ChatGPT-style web app. The model is a 6-layer transformer with 8 attention heads, a 512 embedding dimension, and a custom 16,387-token BPE tokenizer, trained on the TinyChat dataset.

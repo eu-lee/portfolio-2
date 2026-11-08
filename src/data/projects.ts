@@ -8,7 +8,6 @@ export type Project = {
   thumbnail: string;
   description: string;
   links: ProjectLink[];
-  technologies: string[];
   date: string;
   order: number | null;
 };
@@ -24,7 +23,7 @@ export const projects: Project[] = Object.entries(files).map(([path, source]) =>
   const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/.exec(source);
   if (!frontmatter) throw new Error(`${path}: missing project frontmatter`);
   const data = parse(frontmatter[1]);
-  for (const key of ["title", "summary", "cover", "date"]) {
+  for (const key of ["title", "cover", "date"]) {
     if (typeof data?.[key] !== "string" || !data[key].trim()) {
       throw new Error(`${path}: missing ${key}`);
     }
@@ -41,11 +40,10 @@ export const projects: Project[] = Object.entries(files).map(([path, source]) =>
   return {
     id: path.split("/").pop()!.replace(/\.md$/, ""),
     title: data.title,
-    summary: data.summary,
+    summary: typeof data.summary === "string" ? data.summary : "",
     thumbnail,
     description: source.slice(frontmatter[0].length).trim(),
     links,
-    technologies: data.technologies ?? [],
     date: data.date,
     order: typeof data.order === "number" ? data.order : null,
   };
