@@ -16,13 +16,21 @@ export default function App() {
   return (
     <>
       <a className="skip-link" href="#content">Skip to content</a>
-      <div className="page">
-        {project ? <ProjectPage key={project.id} project={project} /> : <>
-        <Hero />
-        <main id="content" tabIndex={-1}>
+      <div className={`page${project ? " page--project" : ""}`}>
+        <div className="page-content">
+        <div className="homepage-content" aria-hidden={project ? true : undefined} inert={!!project}>
+        <Hero showMedia={!project} />
+        <main id={project ? undefined : "content"} tabIndex={-1}>
           <PortfolioTabs />
         </main>
-        </>}
+        </div>
+        {project && <ProjectPage key={project.id} project={project} />}
+        </div>
+        <footer className="site-footer">
+          <a href="https://www.linkedin.com/in/eu-lee/" target="_blank" rel="noreferrer">linkedin</a>
+          <a href="mailto:eugene.lee@uwaterloo.ca">email</a>
+          <a href="https://github.com/eu-lee" target="_blank" rel="noreferrer">github</a>
+        </footer>
       </div>
     </>
   );
