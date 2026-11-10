@@ -7,11 +7,8 @@ export function ProjectPage({ project }: { project: Project }) {
   const title = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    const previousTitle = document.title;
-    document.title = `${project.title} — Eugene Lee`;
     window.scrollTo({ top: 0, behavior: "instant" });
     title.current?.focus({ preventScroll: true });
-    return () => { document.title = previousTitle; };
   }, [project]);
 
   return (
