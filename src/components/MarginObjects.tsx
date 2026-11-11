@@ -6,20 +6,17 @@ import type { ObjectItem } from "../data/items";
 
 import { clampPosition, isMargin } from "../lib/itemLayout";
 import type { Point, ItemLayout } from "../lib/itemLayout";
-import { usePageScale } from "../lib/pageScale";
 
 const returnDelay = 5000;
 
-// Positions and sizes are in design pixels; the page scale converts them to CSS pixels.
-function readLayout(scale: number): ItemLayout {
-  return { width: document.body.clientWidth / scale, height: Math.max(200, window.innerHeight / scale) };
+function readLayout(): ItemLayout {
+  return { width: document.body.clientWidth, height: Math.max(200, window.innerHeight) };
 }
 
 function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onOpen: () => void; onRaise: () => void; zIndex: number }) {
   const [position, setPosition] = useState<Point | null>(null);
   const [dragging, setDragging] = useState(false);
   const size = item.size;
-  const scale = usePageScale();
   const layout = useRef<ItemLayout>({ width: 680, height: 856 });
   const [viewport, setViewport] = useState({ left: 0, top: 0, width: 0, height: 0 });
   const initialPosition = useRef<Point | null>(null);
@@ -57,23 +54,20 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
     lastMarginPosition.current = { ...item.initial };
     currentPosition.current = { ...item.initial };
     setPosition({ ...item.initial });
-    return () => clearTimeout(timer.current);
-  }, [item]);
-
-  useLayoutEffect(() => {
     const updateLayout = () => {
-      layout.current = readLayout(scale);
-      setViewport({ left: window.scrollX / scale, top: window.scrollY / scale,
-        width: document.documentElement.clientWidth / scale, height: window.innerHeight / scale });
+      layout.current = readLayout();
+      setViewport({ left: window.scrollX, top: window.scrollY,
+        width: document.documentElement.clientWidth, height: window.innerHeight });
     };
     updateLayout();
     window.addEventListener("resize", updateLayout);
     window.addEventListener("scroll", updateLayout, { passive: true });
     return () => {
+      clearTimeout(timer.current);
       window.removeEventListener("resize", updateLayout);
       window.removeEventListener("scroll", updateLayout);
     };
-  }, [scale]);
+  }, [item]);
 
   const finishDrag = (event: PointerEvent<HTMLButtonElement>, cancelled = false) => {
     const active = drag.current;
@@ -99,7 +93,7 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
     <button
       type="button"
       className={`margin-object margin-object--${item.id}${dragging ? " is-dragging" : ""}`}
-      style={{ zIndex, "--object-label-gap": `${item.labelGap * scale}px`, "--object-size": `${size * scale}px`, "--object-x": `${position.x * scale}px`, "--object-y": `${position.y * scale}px` } as CSSProperties}
+      style={{ zIndex, "--object-label-gap": `${item.labelGap}px`, "--object-size": `${size}px`, "--object-x": `${position.x}px`, "--object-y": `${position.y}px` } as CSSProperties}
       aria-label={`${item.hoverLabel}: Click or press Enter for details. Drag or use arrow keys to move.`}
       aria-haspopup="dialog"
       onPointerDown={(event) => {
@@ -107,17 +101,16 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
         suppressClick.current = false;
         onRaise();
         clearReturn();
-        const start = { x: event.pageX / scale, y: event.pageY / scale };
-        drag.current = { pointer: event.pointerId, start, latest: start, origin: position, moved: false };
+        drag.current = { pointer: event.pointerId, start: { x: event.pageX, y: event.pageY }, latest: { x: event.pageX, y: event.pageY }, origin: position, moved: false };
         event.currentTarget.setPointerCapture(event.pointerId);
       }}
       onPointerMove={(event) => {
         const active = drag.current;
         if (!active || active.pointer !== event.pointerId) return;
-        active.latest = { x: event.pageX / scale, y: event.pageY / scale };
-        const dx = active.latest.x - active.start.x;
-        const dy = active.latest.y - active.start.y;
-        if (Math.hypot(dx * scale, dy * scale) > 5) active.moved = true;
+        active.latest = { x: event.pageX, y: event.pageY };
+        const dx = event.pageX - active.start.x;
+        const dy = event.pageY - active.start.y;
+        if (Math.hypot(dx, dy) > 5) active.moved = true;
         if (!active.moved) return;
         setDragging(true);
         move({ x: active.origin.x + dx, y: active.origin.y + dy });
@@ -147,7 +140,7 @@ function MarginObject({ item, onOpen, onRaise, zIndex }: { item: ObjectItem; onO
         className="object-label"
         aria-hidden="true"
         style={{
-          left: (Math.max(52 - layout.current.width / 2 - position.x, Math.min(size / 2, layout.current.width / 2 - position.x - 52)) - 4) * scale,
+          left: Math.max(52 - layout.current.width / 2 - position.x, Math.min(size / 2, layout.current.width / 2 - position.x - 52)) - 4,
           ...(position.y + size + 44 > layout.current.height ? { top: "auto", bottom: "calc(100% + var(--object-label-gap, 10px))" } : {}),
         }}
       >

@@ -3,10 +3,8 @@ import { PortfolioTabs } from "./components/PortfolioTabs";
 import { useEffect, useState } from "react";
 import { projects } from "./data/projects";
 import { ProjectPage } from "./components/ProjectPage";
-import { usePageScaleController } from "./lib/pageScale";
 
 export default function App() {
-  usePageScaleController();
   const [hash, setHash] = useState(() => window.location.hash);
   useEffect(() => {
     const sync = () => setHash(window.location.hash);

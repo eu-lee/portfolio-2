@@ -1,5 +1,4 @@
 import { type RefObject, useLayoutEffect, useState } from "react";
-import { getPageScale } from "./pageScale";
 
 export type StudGrid = {
   columns: number;
@@ -35,18 +34,16 @@ export type StudGrid = {
 // The wall is sized to *cover* the viewport (rounded up to whole studs) and
 // centred, so it bleeds off all four screen edges instead of sitting inside a
 // border. The sub-stud overflow is clipped by the hero's overflow:hidden.
-export function studGrid(width: number, height: number, dpr = 1, scale = 1): StudGrid {
+export function studGrid(width: number, height: number, dpr = 1): StudGrid {
   const w = Math.max(1, Math.ceil(width));
   const h = Math.max(1, Math.ceil(height));
   const deviceW = Math.round(w * dpr);
   const deviceH = Math.round(h * dpr);
 
-  // Target stud count sets the stud *size*; dividing by the page scale keeps
-  // the same stud count when the whole page scales up.
-  // (the cap keeps studs from shrinking
+  // Target stud count sets the stud *size* (the cap keeps studs from shrinking
   // on very wide screens). Round it to whole device pixels, then fit as many
   // whole studs as the area holds.
-  const targetCols = Math.max(40, Math.min(112, Math.round(w / (10 * scale))));
+  const targetCols = Math.max(40, Math.min(112, Math.round(w / 10)));
   const cell = Math.max(1, Math.round(deviceW / targetCols));
 
   const size = cell / dpr; // css px per stud
@@ -108,7 +105,7 @@ export function useStudGrid(ref: RefObject<HTMLElement | null>) {
 
     const measure = () => {
       const rect = el.getBoundingClientRect();
-      setGrid(studGrid(rect.width, rect.height, window.devicePixelRatio || 1, getPageScale()));
+      setGrid(studGrid(rect.width, rect.height, window.devicePixelRatio || 1));
     };
 
     measure();
